@@ -486,3 +486,194 @@ end
 
 
 
+#### 循环语句中嵌套判断语句
+
+```matlab
+s = 0;
+for i = 1: 100
+    if mod(i, 2) == 1
+        s = s + (1 / i);
+    else
+        s = s - (1 / i);
+    end
+end
+disp(s);
+% 注意需要添加两个 "end"
+```
+
+
+
+#### 利用 for 循环输出各个字符
+
+```matlab
+v = [5, 7, 9 10, 13, 3, 2, 1];
+
+for i = v % 注意此处
+    disp(i);
+end
+```
+
+
+
+#### 用自行编写的函数实现 100 以内的数值之和
+
+```matlab
+function mysum(n)
+    s = 0;
+    for i = 1: n
+        s = s + i;
+    end
+    fprintf('%g', s);
+end
+% 此时只将数值之和进行展示，实际不存在返回值
+
+function result = mysum(a, b)
+    s = 0;
+    for i = a: b
+        s = s + i;
+    end
+    result = s;
+end
+% 此时，函数将由返回值 result
+```
+
+
+
+#### 绘制抛物线
+
+```matlab
+>> x = -3: 0.01: 3;
+>> y = x .* x;
+>> plot(x, y, 'blue-o') % 使线条变为蓝色，同时在节点处添加 'o'
+>> axis equal % 使两坐标轴的间隔相同
+```
+
+
+
+#### 绘制直方图
+
+```matlab
+>> y = [75 91 105 123.5 131 150 179 203];
+>> bar(y)
+```
+
+
+
+#### 绘制三维螺旋线图
+
+```matlab
+>> theta = 0: pi/50: 6*pi;
+>> x = cos(theta);
+>> y = sin(theta);
+>> z = 0:300; % x， y， z 的个数需要相等
+>> plot3(x, y, z) % 绘制 3D 图像需要使用 plot3
+```
+
+
+
+#### 绘制子图
+
+```matlab
+x = -4 * pi: pi/6: 4 * pi;
+y1 = sin(x);
+y2 = sin(2 .* x);
+y3 = sin(3 .* x);
+y4 = sin(4 .* x);
+
+subplot(2, 2, 1);
+plot(x, y1);
+
+subplot(2, 2, 2);
+plot(x, y2);
+
+subplot(2, 2, 3);
+plot(x, y3);
+
+subplot(2, 2, 4);
+plot(x, y4);
+
+% 当第 3 子图的大小为 3 和 4 两子图的大小时
+subplot(2, 2, [3, 4]);
+```
+
+
+
+#### 曲面绘制
+
+```matlab
+>> x = -3: 3;
+>> y = -3: 3;
+>> [X, Y] = meshgrid(x, y); % meshgrid 用于生成网格矩阵
+>> Z = X .^ 2 + Y .^ 2;
+>> surf(X, Y, Z) % surf 用于绘制面图
+```
+
+
+
+#### 绘制动态 sin 图
+
+```matlab
+x = -2 * pi: 0.1: 2 * pi;
+y = sin(x);
+h = plot(x, y); % 使 h 中保存线形信息
+
+for i = 1: 100 % 绘制 100 次；若想无限绘制，可以使用 while ture
+    x = x + 0.1;
+    y = sin(x);
+    set(h, 'XData', x, 'YData', y); % set 函数用于将对象重新设定数值
+    drawnow; % 实时显示未处理完的图像
+end
+```
+
+
+
+#### 绘制动态弹簧
+
+```matlab
+theta = - 10 * pi: 0.1: 10 * pi;
+x = cos(theta);
+y = sin(theta);
+z = theta;
+h = plot3(x, y, z);
+axis([-1, 1, -1, 1, -40, 40]); % 用于固定坐标轴，防止坐标轴数值发生变化
+for i = 1: 100
+    z = 0.95 * z; % 不断压缩弹簧
+    set(h, 'XData', x, 'YData', y, 'ZData', z); 
+    drawnow;
+end
+for i = 1: 100
+    z = z / 0.95; % 不断拉伸弹簧
+    set(h, 'XData', x, 'YData', y, 'ZData', z);
+    drawnow;
+end
+% 若想要重复不断的拉伸压缩弹簧，可以在两个循环外加一个 while true 循环
+```
+
+
+
+#### 绘制时钟
+
+```matlab
+t = 0: pi/50: 2 * pi; % 当设置为 0.1 的间隔时，易在圆弧上缺一段，这是因为无法恰好增加至 2 * pi
+x = cos(t);
+y = sin(t);
+hold on;
+plot(x, y);
+axis equal; % 使坐标间隔相同，圆看上去美观
+
+linex = [0, 1];
+liney = [0, 0];
+h = plot(linex, liney); % 绘制初始直线
+
+theta = 0;
+for i = 1: 1000
+    theta = theta + 0.1;
+    linex(2) = cos(theta); % 将 linex 中第二个元素进行替换
+    liney(2) = sin(theta); % 将 liney 中第二个元素进行替换
+    set(h, 'XData', linex, 'YData', liney);
+    drawnow;
+end
+```
+
+
+
