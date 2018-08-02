@@ -1592,3 +1592,651 @@ saveas(gcf, '<filename>', 'formattype');
 % 对于 format 有两种，一种是位图，如 png 、 bmp 等；另一种是矢量图，类似 pdf 、 eps 等，建议使用矢量图方法，但是当分辨率高于一定值时，无法使用 saveas 保存矢量图，此时需要使用 print
 ```
 
+
+
+#### 图像进阶
+
+#### 对数图
+
+```matlab
+>> x = logspace(-1, 1, 100); % logspace(a, b, n) 在 10 的幂 10^a 和 10^b 之间生成 n 个点
+>> y = x .^ 2;
+>> subplot(2, 2, 1);
+>> plot(x, y);
+>> title('Plot');
+>> subplot(2, 2, 2);
+>> semilogx(x, y); % 按照 x 轴的对数刻度绘制
+>> title('Semilogx');
+>> subplot(2, 2, 3);
+>> semilogy(x, y);
+>> title('Semilogy'); % 按照 y 轴的对数刻度绘制
+>> subplot(2, 2, 4);
+>> loglog(x, y);
+>> title('Loglog'); % 按照 x 、 y 轴的对数刻度绘制
+% 在绘制对数图时应该绘制格线来体现对数图
+```
+
+
+
+#### plotyy() 绘制双 y 轴图形
+
+```matlab
+>> x = 0: 0.1: 20;
+>> y1 = 200 * exp(-0.05 * x) .* sin(x);
+>> y2 = 0.8 * exp(-0.5 * x) .* sin(10 * x);
+>> [AX, H1, H2] = plotyy(x, y1, x, y2); % AX 是原坐标轴， H1 和 H2 是由 y1 和 y2 生成的对象
+>> set(get(AX(1), 'Ylabel'), 'String', 'Left Y-axis');
+>> set(get(AX(2), 'Ylabel'), 'String', 'Right Y-axis');
+>> title('Labeling plotyy');
+>> set(H1, 'LineStyle', '--');
+>> set(H2, 'LineStyle', ':');
+```
+
+
+
+#### 直方图
+
+```matlab
+>> y = randn(1, 1000);
+>> subplot(2, 1, 1);
+>> hist(y, 10); % 表示分组为 10
+>> title('Bins = 10');
+>> subplot(2, 1, 2);
+>> hist(y, 50); % 表示分组为 50
+>> title('Bins = 50');
+% 用于查看整体的趋势
+```
+
+
+
+#### 条形图
+
+```matlab
+>> x = [1 2 5 4 8];
+>> y = [x; 1: 5]; % 生成数组 [1 2 5 4 8; 1 2 3 4 5]
+>> subplot(1, 3, 1);
+>> bar(x);
+>> title('A bargraph of vector x');
+>> subplot(1, 3, 2);
+>> bar(y); % 此时将数组按行分为不同组，按列分为不同 bar
+>> title('A bargraph of vector y');
+>> subplot(1, 3, 3);
+>> bar3(y);
+>> title('A 3D bargrapg');
+```
+
+
+
+#### 条形图的特殊展现形式
+
+```matlab
+>> x = [1 2 5 4 8];
+>> y = [x; 1: 5];
+>> subplot(1, 2, 1);
+>> bar(y, 'stacked'); % 将数据堆积起来
+>> title('stacked')
+>> subplot(1, 2, 2);
+>> barh(y); % 在水平方向上生成条形
+>> title('Horizontal');
+```
+
+
+
+#### 饼状图
+
+```matlab
+>> a = [10 5 20 30];
+>> subplot(1, 3, 1);
+>> pie(a);
+>> subplot(1, 3, 2);
+>> pie(a, [1, 1, 0, 1]); % 矩阵中的 1 表示相邻的块之间是分离的
+>> subplot(1, 3, 3);
+>> pie3(a, [0, 0, 1, 1]);
+```
+
+
+
+#### 极坐标图
+
+```matlab
+>> x = 1: 100;
+>> theta = x / 10;
+>> r = log10(x);
+>> subplot(1, 4, 1);
+>> polar(theta, r);
+>> theta = linspace(0, 2*pi);  % linspace(n, m) 返回 n - m 之间 100 个数值
+>> r = cos(4 * theta);
+>> subplot(1, 4 ,2);
+>> polar(theta, r);
+>> theta = linspace(0, 2*pi, 6); % linspace(a, b, n) 返回 a - b 之间 n 个数值，相当于将圆分为 5 等份
+>> r = ones(1, length(theta));
+>> subplot(1, 4, 3);
+>> polar(theta, r);
+>> theta = linspace(0, 2*pi);
+>> r = 1 - sin(theta);
+>> subplot(1, 4, 4);
+>> polar(theta, r);
+```
+
+
+
+#### 梯状图及茎状图
+
+```matlab
+>> x = linspace(0, 4*pi, 40);
+>> y = sin(x);
+>> subplot(1, 2, 1);
+>> stairs(y);
+>> subplot(1, 2, 2);
+>> stem(y);
+```
+
+
+
+#### 练习：绘制图形
+
+```matlab
+>> x = linspace(0, 10, 1000);
+>> y = sin(pi * x .^ 2 / 4);
+>> plot(x, y); % 先在 figure 上绘制线图
+>> xx = linspace(0, 10, 51);
+>> hold on 
+>> g = sin(pi * xx .^ 2 / 4);
+>> h = stem(xx, g); % 再绘制茎状图
+```
+
+
+
+#### 箱型图
+
+```matlab
+>> load carsmall
+>> boxplot(MPG, Origin)
+% 通过 MATLAB 中附带的 carsmall.mat 文件中的数据绘图； MPG 表示示例中年均汽油消耗； Origin 表示国家地区
+```
+
+
+
+####误差棒图
+
+```matlab
+>> x = 0: pi/10: pi;
+>> y = sin(x);
+>> e = std(y) * ones(size(x)); % 通过标准差得到相应的误差，由于需要与自变量个数一致，故使用 ones 函数
+>> errorbar(x, y, e);
+```
+
+
+
+#### fill 函数
+
+```matlab
+>> t = (1: 2: 15)' * pi / 8;
+>> x = sin(t);
+>> y = cos(t);
+>> fill(x, y, 'r'); % fill 函数除了能按照 (x, y) 坐标点进行连线外，还能将包围区域进行填充
+>> axis square off % 关闭坐标轴
+>> text(0, 0, 'STOP', 'Color', 'w', 'FontSize', 80,...
+'FontWeight', 'bold', 'HorizontalAlignment', 'center');
+```
+
+
+
+#### 练习：绘制 WAIT 图形
+
+```matlab
+>> t = (0: 1: 4)' * pi / 2;
+>> x = sin(t);
+>> y = cos(t);
+>> fill(x, y, 'y', 'LineWidth', 2);
+>> axis square off
+>> text(0, 0, 'WAIT', 'Color', 'k', 'FontSize', 80,...
+'FontWeight', 'bold', 'HorizontalAlignment', 'center');
+```
+
+
+
+#### 练习：更改条形图中竖条颜色
+
+```matlab
+>> G = [46 38 29 24 13];
+S = [29 27 17 26 8];
+B = [29 23 19 32 7];
+h = bar(1: 5, [G' S' B']);
+>> title('Medal count for top 5 countries in 2012 Olympics');
+>> ylabel('Number of medals');
+>> xlabel('Country');
+>> legend('Gold', 'Sliver', 'Bronze');
+>> set(h(1), 'FaceColor', [1 0.9 0.3]);
+>> set(h(2), 'FaceColor', [0.5 0.5 0.5]);
+>> set(h(3), 'FaceColor', [0.6 0.3 0]);
+>> set(gca, 'XTickLabel', {'USA', 'CHN', 'GBR', 'RUS', 'KOR'});
+```
+
+
+
+#### 通过不同的 z 坐标来反映不同的颜色
+
+```matlab
+>> [x, y] = meshgrid(-3: 0.2: 3, -3: 0.2: 3);
+>> z = x .^ 2 + x .* y + y .^ 2;
+>> surf(x, y, z);
+>> box on
+>> set(gca, 'FontSize', 16);
+>> zlabel('z');
+>> xlim([-4 4]);
+>> xlabel('x');
+>> ylim([-4 4]);
+>> ylabel('y')
+
+% -------------------------------------------------------------------------------------------------
+>> imagesc(z);
+>> axis square
+>> xlabel('x');
+>> ylabel('y');
+% imagesc(A) 将矩阵 A 中的元素值按大小转化为不同颜色，并在坐标轴对应位置处以对应颜色染色
+```
+
+
+
+#### colormap
+
+```matlab
+>> colormap(hot)
+>> colormap(jet)
+>> colormap(hsv)
+>> colormap(cool)
+% 剩余部分可上网寻找
+```
+
+
+
+#### plot3()
+
+```matlab
+>> x = 0: 0.1: 3*pi;
+>> z1 = sin(x);
+>> z2 = sin(2*x);
+>> z3 = sin(3*x);
+>> y1 = zeros(size(x))
+>> y3 = ones(size(x));
+>> y2 = y3 ./ 2;
+>> plot3(x, y1, z1, 'r', x, y2, z2, 'g', x, y3, z3, 'b');
+>> grid on
+>> xlabel('x-axis');
+>> ylabel('y-axis');
+>> zlabel('z-axis');
+```
+
+
+
+#### meshgrid()
+
+``` matlab
+>> x = -2: 1: 2;
+>> y = -2: 1: 2;
+>> [X, Y] = meshgrid(x, y)
+
+X =
+
+    -2    -1     0     1     2
+    -2    -1     0     1     2
+    -2    -1     0     1     2
+    -2    -1     0     1     2
+    -2    -1     0     1     2
+
+
+Y =
+
+    -2    -2    -2    -2    -2
+    -1    -1    -1    -1    -1
+     0     0     0     0     0
+     1     1     1     1     1
+     2     2     2     2     2
+% [X, Y] = meshgrid(xgv, ygv);
+% meshgrid 生成的 X, Y 是大小相等的矩阵， xgv ， ygv 是两个网格矢量，且同时为行向量
+% X：通过将 xgv 复制 length(ygv) - 1 行得到
+% Y：首先对 ygv 进行转置得到 ygv' ，将 ygv' 复制 length(xgv) - 1 次
+```
+
+
+
+#### mesh 与 surf 区别
+
+```matlab
+>> x = -3.5: 0.2: 3.5;
+>> y = -3.5: 0.2: 3.5;
+>> [X, Y] = meshgrid(x, y);
+>> Z = X .* exp(-X .^ 2 - Y .^ 2);
+>> subplot(1, 2, 1);
+>> mesh(X, Y, Z);
+>> subplot(1, 2, 2);
+>> surf(X, Y, Z);
+% 两者区别在于 mesh 命令绘制的图形是一个一排排的彩色曲线组成的网格图，而 surf 命令绘制的是着色的三维曲面
+```
+
+
+
+#### 使用 contour 函数将图形投影至 x-y 平面
+
+```matlab
+>> x = -3.5: 0.2: 3.5;
+y = -3.5: 0.2: 3.5;
+[X, Y] = meshgrid(x, y);
+Z = X .* exp(-X .^ 2 - Y .^ 2);
+>> subplot(2, 1, 1);
+>> mesh(X, Y,Z);
+>> axis square
+>> subplot(2, 1, 2);
+>> contour(X, Y, Z);
+>> axis square
+% 此时绘制的 coutour 图形较为稀疏
+
+% -------------------------------------------------------------------------------------------------% contour 函数的其他命令
+>> x = -3.5: 0.2: 3.5;
+y = -3.5: 0.2: 3.5;
+[X, Y] = meshgrid(x, y);
+Z = X .* exp(-X .^ 2 - Y .^ 2);
+>> subplot(1, 3, 1);
+>> contour(Z, [-0.45: 0.05: 0.45]); % 将等高线以规定间隔的线条表示，如此可以增加线条密度
+>> axis square
+>> subplot(1, 3, 2);
+>> [C, h] = contour(Z); % 其中 C 为等高线矩阵，包含定义得到的数据； h 为等高线的句柄；
+>> clabel(C, h); % 为图形添加标签：把标签旋转到恰当的角度，再插入到等高线中。只有等高线有足够的空间才能放入，当然这决定于等高线的尺度
+>> axis square
+>> subplot(1, 3, 3);
+>> contourf(Z); % 为图形填充颜色， f 相当于 fill
+>> axis square
+```
+
+
+
+#### 练习： contour 函数综合应用
+
+```matlab
+>> x = -3.5: 0.2: 3.5;
+y = -3.5: 0.2: 3.5;
+[X, Y] = meshgrid(x, y);
+Z = X .* exp(-X .^ 2 - Y .^ 2);
+>> [C, h] = contourf(Z, [-0.45: 0.05: 0.45]);
+>> clabel(C, h);
+```
+
+
+
+#### meshc 和 surfc 函数
+
+```matlab
+% 与 mesh 和 surf 的区别在于，这两个函数还在生产原 mesh 或 surf 图形的同时，还进行了 contour 函数的使用，故直接具有投影图
+>> x = -3.5: 0.2: 3.5;
+>> y = -3.5: 0.2: 3.5;
+>> [X, Y] = meshgrid(x, y);
+>> Z = X .* exp(-X .^ 2 - Y .^ 2);
+>> subplot(1, 2, 1);
+>> meshc(X, Y, Z);
+>> subplot(1, 2, 2);
+>> surfc(X, Y, Z);
+```
+
+
+
+#### 角度 (View) 和光线 (Light)
+
+```matlab
+>> sphere(50); % 绘制球体
+>> shading flat; 
+% shading faceted : 默认模式，在曲面或图形对象上叠加黑色的网格线；
+% shading flat : 在 shading faceted 的基础上去掉图上的网格线；
+% shading interp : 对曲面或图形对象的颜色着色进行色彩的插值处理，使色彩平滑过渡
+>> light('Position', [1 3 2]); % 表示灯光照射的位置
+>> light('Position', [-3 -1 3]);
+>> material shiny; 
+% 材质命令
+% shiny : 使对象比较明亮，镜反射份额较大，反射光颜色仅取决于光源颜色
+% dull : 使对象比较暗淡，漫反射份额比较大，没有镜面亮点，反射光颜色仅取决于光源颜色
+% metal : 使对象带金属光泽，镜反射份额很大，背景光和漫反射份额很小，反射光颜色取决于光源和图形表面两者的颜色，该模式为默认设置
+% default : 返回默认设置模式
+>> axis vis3d off;
+>> set(gcf, 'Color', [1 1 1]); 
+% 上面的命令表示将背景色设为白色
+% [0 0 0] 时为黑色
+% 'none' 表示无背景
+>> colormap(jet) % 修改 colormap 为 jet
+>> view(-45, 20); % 观察点角度
+
+% -------------------------------------------------------------------------------------------------
+>> [X, Y, Z] = sphere(64); % 得到球体的相应变量
+>> h = surf(X, Y, Z); % 绘制球体
+>> axis square vis3d off;
+>> reds = zeros(256, 3); % 得到 256 * 3 的 0 矩阵
+>> reds(:, 1) = (0:256.-1) / 255;
+>> colormap(reds); % 新建 colormap
+>> shading interp;
+>> lighting phong % 照明模式：使图表面光滑细腻，色彩丰富
+>> set(h, 'AmbientStrength', 0.75, 'DiffuseStrength', 0.5);
+>> L1 = light('Position', [-1, -1, -1]); % 光照点位置
+
+% 当需要修改光照点位置，而不是增加光照点位置时
+>> set(L1, 'Position', [-1, -1, 1]);
+```
+
+
+
+### GUI
+
+#### 多图绘制
+
+```matlab
+% 在 MATLAB 中绘图一般在 axes 上完成，当有多个 axes 时需要指定绘图对象
+handles.peaks = peaks(35);
+handles.membrane = membrane;
+[x, y] = meshgrid(-8: 0.5: 8);
+r = sqrt(x .^ 2 + y .^ 2) + eps;
+sinc = sin(r) ./ r;
+handles.sinc = sinc;
+handles.current_data = handles.peaks;
+surf(handles.axes1, handles.current_data);
+
+% 或者将最后一行拆开来写
+axes(handles.axes1);
+surf(handles.current_data);
+```
+
+
+
+#### 通过移动 Slider 让静态文本显示相应的 Value
+
+```matlab
+a = get(handles.slider1, 'Value');
+set(handles.text2, 'String', a);
+```
+
+
+
+#### 存储变量
+
+```matlab
+handles.myData = a; % a 可以替换为任意变量
+guidata(hObject, handles);
+```
+
+
+
+#### 使用变量
+
+```matlab
+a = handles.myData;
+```
+
+
+
+#### deploytool
+
+```matlab
+% 使用 deploytool 来将代码作为 .exe 文件输出，以便他人运行
+% 需要添加 .m 文件和 .fig 文件
+```
+
+
+
+### 影像分析
+
+#### 读取和显示影像
+
+```matlab
+>> I = imread('1.jpg'); % read
+>> imshow(I); % show
+```
+
+
+
+#### 通过像素颜色矩阵修改影像
+
+```matlab
+>> for i = 1: size(I, 1)
+>> 	for j = 1: size(I, 2)
+>> 		if (rem(i, 2) == 0 && rem(j ,2) == 0)
+>> 			I(i, j) = 0;
+>> 		end
+>> 	end
+>> end
+```
+
+
+
+#### 查看影像信息
+
+```matlab
+>> imageinfo('1.jpg')
+```
+
+
+
+#### 通过 imtool 查看影像信息
+
+```matlab
+>> imtool('1.jpg')
+% 通过该工具内置的 inspect pixel values 查看相应点的像素信息
+```
+
+
+
+#### 通过 immultiply() 增大像素数值从而使其变亮
+
+```matlab
+>> I = imread('rice.png');
+>> subplot(1, 2, 1);
+>> imshow(I);
+>> J = immultiply(I, 1.5); % 表示像素矩阵乘以 1.5 倍
+% 可以通过点乘矩阵的方式得到相同的效果 J = 1.5 .* I;
+>> subplot(1, 2, 2);
+>> imshow(J);
+```
+
+
+
+#### 通过 imadd 叠加影像
+
+```matlab
+>> I = imread('rice.png');
+>> J = imread('cameraman.tif');
+>> K = imadd(I, J);
+>> subplot(1, 3, 1);
+>> imshow(I);
+>> subplot(1, 3, 2);
+>> imshow(K);
+>> subplot(1, 3, 3);
+>> imshow(J);
+% 可以看到叠加后影像变亮了，这是因为相加后相应的像素值变大，但由于最大值为 255 ，所以对于溢出的值都将为 255 ，从而呈现白色
+% 对于 imadd 使用的两个图像要保证尺寸相同，即保证其相加的矩阵相同
+```
+
+
+
+#### 图像直方图
+
+```matlab
+>> I = imread('rice.png');
+>> imhist(I);
+% 对于灰度图，横坐标为灰度，值在 0 - 255 之间，纵坐标表示相应的像素数量
+```
+
+
+
+#### 使用 histeq 将图像直方图均衡化
+
+```matlab
+>> I = imread('pout.tif');
+>> I2 = histeq(I);
+>> subplot(1, 4, 1);
+>> imhist(I);
+>> subplot(1, 4, 2);
+>> imshow(I);
+>> subplot(1, 4, 3);
+>> imshow(I2);
+>> subplot(1, 4, 4);
+>> imhist(I2);
+% 简单来说，就是某些图像中有太多亮点或者暗点， histeq 通过一个算法，将亮度重新分配，让人觉得舒服
+```
+
+
+
+#### 自制 histeq
+
+```matlab
+>> H = imread('pout.tif');
+>> figure;
+>> subplot(1, 2, 1);
+>> imshow(H);
+>> H = im2double(H); % 将 H 的类型变为 double 类型
+>> [M, N] = size(H); % 获取图像的维度
+>> [counts, x] = imhist(H); % 读取图像直方图， counts 是每个灰度值的个数， x 表示灰度值
+>> location = find(counts ~= 0); % 找到所有像素个数不为 0 的灰度级
+>> MinCDF = min(counts(location)); % 找到包含个数最少的灰度级
+>> for j = 1: length(location)
+    CDF = sum(counts(location(1: j))); % 计算各个灰度级像素个数累计分布
+    P = find(H == x(location(j))); % 找到图像中某个灰度级，所有像素点所在位置
+    H(P) = (CDF - MinCDF) / (M * N - MinCDF); % 利用灰度换算公式，修改所有位置上的像素值
+end
+>> subplot(1, 2, 2);
+>> imshow(H);
+```
+
+
+
+### 图像变换
+
+#### 旋转
+
+```matlab
+>> I = imread('rice.png'); subplot(1, 2, 1);
+>> imshow(I)
+>> I = imread('rice.png'); subplot(1, 2, 1);
+>> imshow(I)
+>> J = imrotate(I, 35, 'bilinear'); % 35 表示旋转角度， bilinear 表示双线性插值
+>> subplot(1, 2, 2); imshow(J);
+>> size(I)
+
+ans =
+
+   256   256
+
+>> size(J)
+
+ans =
+
+   357   357
+% 可以看出图像大小将发生改变
+```
+
+
+
+#### 存储影像
+
+```matlab
+imwrite(I, 'pout2.png');
+% 即影像矩阵和文件名
+```
+
+
+
