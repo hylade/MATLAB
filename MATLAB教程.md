@@ -2240,3 +2240,356 @@ imwrite(I, 'pout2.png');
 
 
 
+#### 利用 threshold 计算米粒数
+
+```matlab
+>> I = imread('rice.png');
+>> level = graythresh(I) % 通过 graythresh 得到合理的阈值
+
+level =
+
+    0.5137
+
+>> bw = im2bw(I, level); % 根据该阈值，将灰度图转化为黑白图
+>> subplot(1, 2, 1);
+>> imshow(I);
+>> subplot(1, 2, 2);
+>> imshow(bw);
+```
+
+
+
+#### 联系：自制 im2bw
+
+```matlab
+>>  I = imread('rice.png');
+[M, N] = size(I);
+for i = 1: M
+       for j = 1: N
+           if I(i, j) >= graythresh(I) * 250
+               J(i, j) = 1;
+           else
+               J(i, j) = 0;
+           end
+       end
+end
+imshow(J);
+```
+
+
+
+#### 获得图片背景并在原图中将其减去
+
+```matlab
+>> I = imread('rice.png');
+>> subplot(1, 3, 1);imshow(I);
+>> BG = imopen(I, strel('disk', 15)); % imopen 是一个复杂的函数，中文名为开操作；作用是使对象的轮廓变得光滑，断开狭窄的间断和消除细的突出物； strel 函数用来构件形态学运算中的结构元素，使用语法是 strel(shape, parameters) ；shape 是形状参数，即设置什么样的结构元素； parameters 为控制形状参数大小方向的参数；
+% 此处形状参数是 disk ，大小为 15 ，表示创建一个指定半径 15 的平面圆盘形的结构元素
+>> subplot(1, 3, 2);imshow(BG);
+>> I2 = imsubtract(I, BG); % 通过 imsubtract 将 BG 从 I 中减去
+>> subplot(1, 3, 3); imshow(I2);
+```
+
+
+
+#### 是否减去背景的灰白图对比
+
+```matlab
+>> I = imread('rice.png');
+>> level = graythresh(I);
+>> bw = im2bw(I, level);
+>> subplot(1, 2 ,1); imshow(bw);
+>> BG = imopen(I, strel('disk', 15));
+>> I2 = imsubtract(I, BG);
+>> level2 = graythresh(I2);
+>> bw2 = im2bw(I2, level2);
+>> subplot(1, 2, 2); imshow(bw2);
+```
+
+
+
+#### 计算米粒数
+
+```matlab
+>> I = imread('rice.png');
+BG = imopen(I, strel('disk', 15));
+I2 = imsubtract(I, BG); level = graythresh(I2);
+BW = im2bw(I2, level);
+>> [labeled, numObjects] = bwlabel(BW, 8);
+% bwlabel 函数将返回一个和 BW 相同大小的矩阵和连通区域的个数。矩阵中包含了 BW 中每个连通区域的类别标签； n 的取值可以为 4 或者 8 ，表示是按照 4 连通寻找区域还是 8 连通寻找，默认为 8 。
+```
+
+
+
+#### 寻找米粒中的最大值和平均大小
+
+```matlab
+>> I = imread('rice.png');
+BG = imopen(I, strel('disk', 15));
+I2 = imsubtract(I, BG); level = graythresh(I2);
+BW = im2bw(I2, level);
+[labeled, numObjects] = bwlabel(BW, 8);
+>> for i = 1: numObjects
+A(i) = length(find(labeled == i));
+end
+>> max(A)
+
+ans =
+
+   404
+
+>> mean(A)
+
+ans =
+
+  178.5758
+```
+
+
+
+#### 给米粒表上色彩
+
+```matlab
+>> I = imread('rice.png');
+BG = imopen(I, strel('disk', 15));
+I2 = imsubtract(I, BG); level = graythresh(I2);
+BW = im2bw(I2, level);
+[labeled, numObjects] = bwlabel(BW, 8);
+>> RGB_label = label2rgb(labeled); % 需要使用 label2rgb 函数，将不同标签的米粒标上不同的颜色
+>> imshow(RGB_label);
+```
+
+
+
+#### 米粒数量统计与直方图显示
+
+```matlab
+>> I = imread('rice.png');
+>> BG = imopen(I, strel('disk', 15)); % 开运算得到背景
+>> I2 = imsubtract(I, BG);
+>> level = graythresh(I2); % 自动寻找阈值
+>> bw = im2bw(I2, level); % 用找到的阈值进行二值化，大于该阈值的灰度将显示为白色
+>> [labeled, nums] = bwlabel(bw, 8);
+>> for i = 1: nums
+A(i) = length(find(labeled == i));
+end
+>> subplot(1, 4, 1); imshow(I);
+>> subplot(1, 4, 2); imshow(I2);
+>> subplot(1, 4, 3); imshow(bw);
+>> subplot(1, 4, 4); hist(A);
+>> j = findobj(gca, 'Type', 'axes');
+>> j.XLim = [0, 500];
+>> title('米粒数量统计');
+>> ylabel('米粒数量');
+>> xlabel('米粒尺寸范围');
+```
+
+
+
+#### 将米粒变为红色
+
+```matlab
+>> I = imread('rice.png');
+>> BG = imopen(I, strel('disk', 15));
+>> I2 = imsubtract(I, BG);
+>> level = graythresh(I2);
+>> bw = im2bw(I2, level);
+>> [sx sy sz] = size(bw); % 获得黑白图的三维度
+>> I(:, :, 2) = I(:, :, 1);
+>> I(:, :, 3) = I(:, :, 1); % 保证 I 是一个 m * m * 3 的矩阵，从而能够作用 rgb
+>> subplot(1, 2, 1);
+>> imshow(bw);
+>> moto = rgb2ycbcr(I); % 将 rgb 转化为 ycbcr 彩色空间。亮度信息单独由分量 Y 来表示，彩色信息是用两个色差分量 cb 和 cr 来存储；分量 cb 是蓝色分量与参考值的差，分量 cr 是红色分量与参考值的差
+>> moto(:, :, 3) = 0; 
+>> moto(:, :, 2) = 0; % 由于 moto 中只有红色分量，故将 g 和 b 颜色分量置为 0
+>> moto(:, :, 1) = bw(:, :, 1); % 定义红色分量维度大小
+>> moto(find(moto(:, :, 1) == 1)) = 255; % 将原图中显示白色的点像素置为 255
+>> subplot(1, 2 ,2);
+>> imshow(moto);
+```
+
+
+
+#### 使用 regionprops 查看米粒的特点
+
+```matlab
+>> I = imread('rice.png');
+BG = imopen(I, strel('disk', 15));
+I2 = imsubtract(I, BG);
+level = graythresh(I2);
+bw = im2bw(I2, level);
+>> [labeled, numObjects] = bwlabel(bw, 8);
+>> graindata = regionprops(labeled, 'basic'); % 通过 regionprops 将各个区域米粒的 basic 信息存储到 graindata 中
+>> graindata(51)
+
+ans = 
+
+  包含以下字段的 struct:
+
+           Area: 155
+       Centroid: [112.4258 245.8645]
+    BoundingBox: [108.5000 234.5000 8 22]
+>> graindata
+
+graindata = 
+
+  包含以下字段的 99×1 struct 数组:
+
+    Area
+    Centroid
+    BoundingBox
+% gradindata 中共有 99 组数据，每组数据都代表一个米粒
+```
+
+
+
+#### 通过 bwselect 选择米粒显示
+
+```matlab
+>> I = imread('rice.png');
+BG = imopen(I, strel('disk', 15));
+I2 = imsubtract(I, BG);
+level = graythresh(I2);
+bw = im2bw(I2, level);
+>> ObjI = bwselect(bw); % 此时可以通过鼠标进行点选，完成后键入 enter 完成选择
+>> imshow(ObjI); % 此时显示的图像将只有选中的几颗米粒
+```
+
+
+
+### 数值微积分
+
+#### 多项式数值显示
+
+```matlab
+>> a = [9, -5, 3, 7];
+>> x = -2: 0.01: 5;
+>> f = polyval(a, x); % 通过 polyval 函数进行多项式运算
+>> plot(x, f, 'LineWidth', 2); % 使用 plot 进行绘制
+>> xlabel('x');
+>> ylabel('f(x)');
+>> set(gca, 'FontSize', 14);
+```
+
+
+
+#### 多项式微分
+
+```matlab
+>> p = [5, 0, -2, 0, 1];
+>> polyder(p)
+
+ans =
+
+    20     0    -4     0
+% 使用 polyder 函数完成
+
+% -------------------------------------------------------------------------------------------------
+% 若希望得到微分后多项式在 x = 7 时的结果
+>> polyval(polyder(p), 7)
+
+ans =
+
+        6832
+```
+
+
+
+#### 练习：在一副上绘制复杂多项式的曲线和其导数的曲线
+
+```matlab
+>> x = -2: 0.01: 1;
+>> y1 = [20 -7 5 10];
+>> y2 = [4 12 -3];
+>> f = conv(y1, y2); % conv 用于返回两者的卷积。若两者为多项式系数的向量，对其卷积与将这两个多项式相乘等效
+>> g = polyval(f, x);
+>> F = polyder(f);
+>> g2 = polyval(F, x);
+>> plot(x, g, x, g2);
+```
+
+
+
+#### 多项式积分
+
+```matlab
+% 使用 polyint() 完成
+>> p = [5 0 -2 0 1];
+>> polyint(p, 3)
+
+ans =
+
+    1.0000         0   -0.6667         0    1.0000    3.0000
+
+% 查看积分后多项式在 x = 7 时的值
+>> polyval(polyint(p), 7)
+
+ans =
+
+   1.6585e+04
+```
+
+
+
+#### 求两点之间的斜率
+
+```matlab
+% 两点分别为 (1,5) , (2, 7)
+>> x = [1 2];
+>> y = [5 7];
+>> slope = diff(y) ./ diff(x);
+>> slope
+
+slope =
+
+     2
+% diff() 函数能够返回输入各相邻元素之间的差值
+% 示例
+>> x = [1 2 5 4 1];
+>> diff(x)
+
+ans =
+
+     1     3    -1    -3
+```
+
+
+
+#### 求微分
+
+根据公式
+
+$$f'(x_{0}) = \lim \limits_{h\to0} \frac{f(x_{0} + h) - f(x_{0})}{h}$$
+
+```matlab
+% 对于函数 f(x) = sin(x) ，找到其微分在 x0 = pi/2 且 h = 0.1 时的值
+>> x0 = pi / 2;
+>> h = 0.1;
+>> x = [x0 x0 + h];
+>> y = [sin(x0) sin(x0 + h)];
+>> m = diff(y) ./ diff(x)
+
+m =
+
+   -0.0500
+   
+% 当 h 的数值不断缩小时，微分的数值将趋于 0
+>> h = logspace(-1, -7, 7); % 从 10^-1 到 10^-7
+>> x0 = pi / 2;
+>> x = [x0 x0 + h];
+y = [sin(x0) sin(x0 + h)];
+m = diff(y) ./ diff(x)
+
+m =
+
+   -0.0500   -0.0550   -0.0055   -0.0005   -0.0001   -0.0000   -0.0000
+```
+
+
+
+#### sin(x) 在区间 0 - 2pi 之间的导数值
+
+```matlab
+
+```
+
