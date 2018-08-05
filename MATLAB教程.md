@@ -2590,6 +2590,534 @@ m =
 #### sin(x) 在区间 0 - 2pi 之间的导数值
 
 ```matlab
-
+>> h = 0.5; x = 0: h: 2*pi;
+>> y = sin(x);
+>> m = diff(y) ./ diff(x);
+>> hold on;
+>> plot(0: 0.1: 2*pi, sin(0: 0.1: 2*pi));
+>> plot(x(1: end - 1), m, '--or'); % end - 1 表示倒数第二个元素，也可以使用 end - n 表示倒数 n + 1 个元素;需要如此操作是因为每次微分都会减少一个数值
+>> hold off
+>> set(gca, 'XLim', [0, 2*pi]);
+>> set(gca, 'YLim', [-1.2, 2]);
+>> set(gca, 'FontSize', 25);
+>> set(gca, 'XTick', 0: pi/2: 2*pi);
+>> set(gca, 'FontName', 'Latex');
+>> set(gca, 'XTickLabel', {'0', '\pi/2', '\pi', '3\pi/2', '2\pi'});
+>> h = legend('sin(x)', strcat('sin', '''', '(x)')); % strcat 用于水平串联字符串，对于中间 '''' 用于生成 sin'(x) 的 ' ,两侧的表示字符串，中间左侧的表示转义，右侧的才是输出的 ' 
+>> set(h, 'FontName', 'Times New Roman');
+>> box on
 ```
+
+
+
+#### 不同大小 h 对于微分的影响
+
+```matlab
+>> g = colormap(lines);
+>> hold on
+>> for i = 1: 4
+x = 0: power(10, -i): pi;
+y = sin(x); m = diff(y) ./ diff(x);
+plot(x(1: end - 1), m, 'Color', g(1, :));
+end
+>> hold off
+>> set(gca, 'XLim', [0, pi/2]);
+>> set(gca, 'YLim', [0, 1.2]);
+>> set(gca, 'FontSize', 18);
+>> set(gca, 'FontName', 'Latex');
+>> set(gca, 'XTick', 0: pi/4: pi/2);
+>> set(gca, 'XTickLabel', {'0', '\pi/4', '\pi/2'});
+>> h = legend('h = 0.1', 'h = 0.01', 'h = 0.001', 'h = 0.0001');
+>> set(h, 'FontName', 'Times New Roman');
+>> box on
+% 绘制四种 h 大小对微分曲线的影响图
+```
+
+
+
+#### 练习：绘制 f(x) 的微分曲线
+
+```matlab
+>> hold on
+>> for i = 1: 3
+x = 0: power(10, -i): 2*pi;
+y = exp(-x) .* sin(x .^ 2 / 2);
+m = diff(y) ./ diff(x);
+plot(x(1: end - 1), m);
+end
+>> hold off
+>> set(gca, 'XLim', [0, 2*pi]);
+>> set(gca, 'YLim', [-0.3, 0.3]);
+>> set(gca,'FontSize', 18);
+>> set(gca, 'FontName', 'Latex');
+set(gca, 'XTick', 0: pi/2: 2*pi);
+set(gca, 'XTickLabel', {'0', '\pi/2', '\pi', '3\pi/2', '2\pi'});
+h = legend('h = 0.1', 'h = 0.01', 'h = 0.001');
+set(h, 'FontName', 'Times New Roman');
+box on
+```
+
+
+
+#### 求二次导
+
+```matlab
+>> x = -2: 0.005: 2;
+>> y = x .^ 3;
+>> m = diff(y) ./ diff(x);
+>> m2 = diff(m) ./ diff(x(1: end - 1));
+>> plot(x, y, x(1: end-1), m, x(1: end-2), m2);
+>> xlabel('x', 'FontSize', 18);
+>> ylabel('y', 'FontSize', 18);
+>> legend('f(x) = x^3', 'f''(x)', 'f''''(x)', 'Location', 'SouthEast');
+>> set(gca, 'FontSize', 18);
+```
+
+
+
+#### 数值积分
+
+有两种方式：矩形规则和梯形规则；矩形规则对应的是中点横坐标规则；梯形规则对应的是中点函数值规则
+
+```matlab
+% 通过 sum 函数求解
+>> h = 0.05;
+>> x = 0: h: 2;
+>> midpoint = (x(1: end - 1) + x(2: end)) ./ 2; % 取得各个中点的横坐标
+>> y = 4 .* midpoint .^ 3; % 取得对应横坐标的纵坐标
+>> s = sum(h .* y) % 求面积并求和
+
+s =
+
+   15.9950
+   
+% 通过 trapz 函数求解
+>> h = 0.05;
+>> x = 0: h: 2;
+>> y = 4 .* x .^ 3;
+>> s = h .* trapz(y); % 求函数值的平均值
+>> s
+
+s =
+
+   16.0100
+   
+% 若将 trapz 自制
+>> h = 0.05;
+>> x = 0: h: 2;
+>> y = 4 .* x .^ 3;
+>> trapezoid = (y(1: end-1) + y(2: end)) ./ 2;
+>> s = h .* sum(trapezoid)
+
+s =
+
+   16.0100
+```
+
+
+
+### 函数内嵌套使用函数
+
+在函数内嵌套使用函数不能直接使用函数名，需要使用 @ 作为指针指向需要使用的函数
+
+
+
+#### 数值积分
+
+```matlab
+>> y = @(x) 1./(x .^ 3 - 2 * x - 5); % 创建函数
+>> integral(y, 0, 2) % integral 表示积分， 0 和 2 分别表示下限和上限
+
+ans =
+
+   -0.4605
+```
+
+
+
+#### 多重积分
+
+```matlab
+% 二重积分使用 integral2
+>> f = @(x, y) y .* sin(x) + x .* cos(y);
+>> integral2(f, pi, 2*pi, 0, pi) % 注意积分上下限需要由内写到外
+
+ans =
+
+   -9.8696
+
+% 三重积分使用 integral3
+>> f = @(x, y, z) y .* sin(x) + z .* cos(y);
+>> integral3(f, 0, pi, 0, 1, -1, 1)
+
+ans =
+
+    2.0000
+```
+
+
+
+### 方程式求根
+
+#### 符号变量
+
+```matlab
+% 可以通过 syms 和 sym 两种方法定义符号变量
+>> syms x
+>> x + x + x
+ 
+ans =
+ 
+3*x
+ 
+>> (x + x + x) / 4
+ 
+ans =
+ 
+(3*x)/4
+
+% 两种方式略有不同，但作用相同
+>> x = sym('x');
+>> x + x + x
+ 
+ans =
+ 
+3*x
+ 
+>> (x + x + x) / 4
+ 
+ans =
+ 
+(3*x)/4
+```
+
+
+
+#### 通过 solve 与符号变量求解
+
+```matlab
+>> syms x
+>> y = x * sin(x) - x;
+>> solve(y, x) % 此时默认求解的是当 y 为 0 时， x 的数值
+ 
+ans =
+ 
+    0
+ pi/2
+```
+
+
+
+#### 练习：求解方程的根
+
+```matlab
+>> syms x
+>> y = cos(x) .^ 2 - sin(x) .^ 2;
+>> solve(y, x)
+ 
+ans =
+ 
+pi/4
+
+>> syms x
+>> y = cos(x) .^ 2 + sin(x) .^ 2;
+>> solve(y, x)
+ 
+ans =
+ 
+Empty sym: 0-by-1 % 表示无解析解
+```
+
+
+
+#### 通过 solve 求解方程组
+
+```matlab
+>> syms x y
+>> eq1 = x - 2 * y - 5;
+>> eq2 = x + y - 6;
+>> A = solve(eq1, eq2, x, y)
+
+A = 
+
+  包含以下字段的 struct:
+
+    x: [1×1 sym]
+    y: [1×1 sym]
+
+>> A.x
+ 
+ans =
+ 
+17/3
+ 
+>> A.y
+ 
+ans =
+ 
+1/3
+```
+
+
+
+#### 通过符号表达方程式的解
+
+```matlab
+syms x a b
+>> solve(a*x^2-b)
+ 
+ans =
+ 
+  b^(1/2)/a^(1/2)
+ -b^(1/2)/a^(1/2
+```
+
+
+
+#### 练习：x 的表达式
+
+```matlab
+>> syms x y a b r
+>> solve((x - a)^2 + (y - b)^2 - r^2)
+ 
+ans =
+ 
+ a + (b + r - y)^(1/2)*(r - b + y)^(1/2)
+ a - (b + r - y)^(1/2)*(r - b + y)^(1/2)
+```
+
+
+
+#### 练习：求矩阵的逆
+
+```matlab
+>> syms a b c d
+>> A = [a b; c d];
+>> inv(A) % 通过函数 inv 完成
+ 
+ans =
+ 
+[  d/(a*d - b*c), -b/(a*d - b*c)]
+[ -c/(a*d - b*c),  a/(a*d - b*c)]
+```
+
+
+
+#### 使用符号变量求解微分
+
+```matlab
+>> syms x
+>> y = 4 * x^5;
+>> yprime = diff(y)
+ 
+yprime =
+ 
+20*x^4
+```
+
+
+
+#### 练习：求函数微分
+
+```matlab
+% 1
+>> syms x
+>> f = exp(x^2) / (x^3 - x + 3);
+>> diff(f)
+ 
+ans =
+ 
+(2*x*exp(x^2))/(x^3 - x + 3) - (exp(x^2)*(3*x^2 - 1))/(x^3 - x + 3)^2
+
+% 2
+syms x y
+>> g = (x^2 + x*y - 1) / (y^3 + x + 3);
+>> diff(g)
+ 
+ans =
+ 
+(2*x + y)/(y^3 + x + 3) - (x^2 + y*x - 1)/(y^3 + x + 3)^2
+```
+
+
+
+#### 使用符号变量积分
+
+```matlab
+>> syms x
+>> y = x^2 * exp(x);
+>> z = int(y); % 先对符号进行积分，但是此时有未知常数 k ，需要通过 z(0) = 0 完成 k 的求解
+>> z = z - subs(z, x, 0) % subs 函数是将某符号表达式 z 中的 x 值用 第三个参数进行代入
+ 
+z =
+ 
+exp(x)*(x^2 - 2*x + 2) - 2
+```
+
+
+
+#### 练习：完成函数积分
+
+```matlab
+>> syms x
+>> f = (x^2 - x + 1) / (x + 3);
+>> int(f, 0, 10)
+ 
+ans =
+ 
+log(302875106592253/1594323) + 10
+```
+
+
+
+#### 通过函数句柄和 fsolve 求解函数
+
+```matlab
+>> f2 = @(x) (1.2*x + 0.3 + x*sin(x));
+>> fsolve(f2, 0) % 0 是初始猜测值，也可改为其他数值
+
+ans =
+
+   -0.3500
+```
+
+
+
+#### 使用 fsolve 解二元方程组
+
+```matlab
+>> F = @(x) ([2 * x(1)- x(2) - exp(-x(1)); -x(1) + 2 * x(2) - exp(x(2))]);
+>> x0 = [-5 -5];
+>> fsolve(F, x0)
+ans =
+
+    0.3880    0.4865
+```
+
+
+
+#### fzero 函数求解
+
+```matlab
+>> f = @(x) x.^2;
+>> fzero(f, 0.1)
+ans =
+
+   NaN
+% 但对于函数与 x 轴相切时，不能得到解，这与函数内部的算法有关
+```
+
+
+
+#### 通过选项来精确解
+
+```matlab
+>> f = @(x) x.^2;
+>> options = optimset('MaxIter', 1e3, 'TolFun', 1e-10); % 前一个选项是最大循环次数，后一个是允许偏差值
+>> fsolve(f, 0.1, options)
+ans =
+
+   1.9532e-04
+```
+
+
+
+#### 使用 roots 求多项式的解
+
+```matlab
+>> roots([1 -3.5 2.75 2.125 -3.875 1.25])
+
+ans =
+
+   2.0000 + 0.0000i
+  -1.0000 + 0.0000i
+   1.0000 + 0.5000i
+   1.0000 - 0.5000i
+   0.5000 + 0.0000i
+```
+
+
+
+#### 通过 rref 完成高斯消去法
+
+```matlab
+>> A = [1 2 1; 2 6 1; 1 1 4];
+>> b = [2; 7; 3];
+>> R = rref([A b])
+
+R =
+
+     1     0     0    -3
+     0     1     0     2
+     0     0     1     1
+% 此时的 b 便是解
+```
+
+
+
+#### 逆矩阵
+
+$$A^{-1} =  \begin{bmatrix}  a&b\\ c&d\end{bmatrix} ^{-1} = \frac{1}{det(A)}adj(A)=\frac{1}{det(A)} \begin{bmatrix} d&-b\\-c&a\end{bmatrix}$$
+
+$$det(A) = \begin{vmatrix} ad-bc\end{vmatrix}$$
+
+关于逆矩阵的特性：
+
+$$A = (A^{-1})^{-1}$$
+
+$$(kA)^{-1} = k^{-1} A^{-1}$$
+
+
+
+#### 使用克莱姆法则及 inv 完成矩阵求解
+
+$$x = A^{-1}b$$
+
+```matlab
+>> A=[1 2 1; 2 6 1; 1 1 4];
+>> b = [2; 7; 3];
+>> x = inv(A) * b
+
+x =
+
+   -3.0000
+    2.0000
+    1.0000
+    
+% 但这种方法当逆矩阵不存在时便无法使用
+>> A = [1 2 3 4; 2 4 6 8; 9 8 7 6; 1 3 2 8];
+>> inv(A)
+警告: 矩阵为奇异工作精度。 
+
+ans =
+
+   Inf   Inf   Inf   Inf
+   Inf   Inf   Inf   Inf
+   Inf   Inf   Inf   Inf
+   Inf   Inf   Inf   Inf
+% 因为此时第 2 行为第 1 行的两倍，不满秩
+```
+
+
+
+#### 通过 cond 查看矩阵是否合适
+
+```matlab
+% 当 cond 得出的数值越小，说明矩阵越健康，因为即使矩阵满秩，但如 A 的情况，也会对解产生很大影响
+>> A = [1 2 3; 2 4.0001 6; 9 8 7];
+>> cond(A)
+
+ans =
+
+   4.3483e+05
+
+>> B = [1 2 3; 2 5 6; 9 8 7];
+>> cond(B)
+
+ans =
+
+   45.5623
+```
+
+
 
