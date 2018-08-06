@@ -3121,3 +3121,494 @@ ans =
 
 
 
+#### 线性系统
+
+用于反应结果 y 与矩阵 A 之间关系的方式
+
+y = Ab
+
+```matlab
+% matlab 中通过 eig 函数得到相应的特征向量和特征值
+>> [v, d] = eig([2 -12; 1 -5])
+
+v =
+
+    0.9701    0.9487
+    0.2425    0.3162
+
+
+d =
+
+   -1.0000         0
+         0   -2.0000
+```
+
+
+
+###统计
+
+```matlab
+>> load stockreturns; % 载入内建数据库
+>> x4 = stocks(:, 4);
+>> mean(x4)
+
+ans =
+
+  -5.8728e-04
+
+>> median(x4)
+
+ans =
+
+    0.0617
+
+>> mode(x4)
+
+ans =
+
+   -5.8764
+
+>> prctile(x4, 75) % 75% 处的值
+
+ans =
+
+    1.7167
+
+>> max(x4) - min(x4)
+
+ans =
+
+   12.3455
+
+>> var(x4)
+
+ans =
+
+    5.5649
+
+>> std(x4)
+
+ans =
+
+    2.3590
+```
+
+
+
+#### 绘制频数图
+
+```matlab
+>> x = 1: 14;
+>> freqy = [1 0 1 0 4 0 1 0 3 1 0 0 1 1];
+>> subplot(1, 3, 1);
+>> bar(x, freqy);
+>> xlim([0 15]);
+>> subplot(1, 3, 2);
+>> area(x, freqy); % 通过凹凸处的点来表示
+>> xlim([0 15]);
+>> subplot(1, 3, 3);
+>> stem(x, freqy);
+>> xlim([0 15]);
+```
+
+
+
+#### 对于未知频数的数据进行绘图
+
+```matlab
+>> x = [1 3 5 5 5 5 7 9 9 9 10 13 14];
+>> n = tabulate(x(:)) % tabulate 能够返回数据的频数和频率
+
+n =
+
+    1.0000    1.0000    7.6923
+    2.0000         0         0
+    3.0000    1.0000    7.6923
+    4.0000         0         0
+    5.0000    4.0000   30.7692
+    6.0000         0         0
+    7.0000    1.0000    7.6923
+    8.0000         0         0
+    9.0000    3.0000   23.0769
+   10.0000    1.0000    7.6923
+   11.0000         0         0
+   12.0000         0         0
+   13.0000    1.0000    7.6923
+   14.0000    1.0000    7.6923
+>> a = n(:, 2)
+
+a =
+
+     1
+     0
+     1
+     0
+     4
+     0
+     1
+     0
+     3
+     1
+     0
+     0
+     1
+     1
+
+>> b = a'
+
+b =
+
+     1     0     1     0     4     0     1     0     3     1     0     0     1     1
+
+>> c = 1: 14;
+>> subplot(1, 3, 1);
+>> bar(c, b);
+>> xlim([0 15])
+>> subplot(1, 3, 2);
+>> area(c, b)
+>> xlim([0 15])
+>> subplot(1, 3, 3);
+>> stem(c, b)
+>> xlim([0 15])
+```
+
+
+
+#### 箱型图
+
+```matlab
+>> marks = [80 81 81 84 88 92 94 96 97];
+>> boxplot(marks) % 调用即可，并使用线条方框等表示 min 1/4点 1/2点 3/4点 max
+>> prctile(marks, [25 75]) % 用来返回相应的分位值
+
+ans =
+
+   81.0000   94.5000
+```
+
+
+
+#### 练习：通过 boxplot 绘制多组数据箱型图
+
+```matlab
+>> load stockreturns;
+>> boxplot(stocks)
+```
+
+
+
+#### 偏态函数与 skewness
+
+```matlab
+>> X = randn([10 3]) * 3; % 生成 10*3 的矩阵，并将随机数乘以 3
+>> X(X(:, 1) < 0, 1) = 0; % 对于第一列中小于 0 的数，都置为 0
+>> X(X(:, 3) > 0, 3) = 0; % 对于第三列中大于 0 的数，都置为 0
+>> boxplot(X, {'Right-skewed', 'Symmetric', 'Left-skewed'}); % 绘制 X 的箱型图，并且添加名称
+>> y = skewness(X) % 得到三组数据偏度
+
+y =
+
+    0.9526    0.0512   -0.5239
+
+```
+
+
+
+#### 峰度
+
+```matlab
+>> load stockreturns;
+>> x4 = stocks(:, 4);
+>> kurtosis(x4)
+
+ans =
+
+    2.8580
+% 放映函数是陡峭还是平缓
+```
+
+
+
+#### 通过 tteset2 进行假设检验
+
+```matlab
+% 检验两组数据的平均数是否相同时
+>> load stockreturns;
+>> x1 = stocks(:, 3);
+>> x2 = stocks(:, 10);
+>> boxplot([x1, x2], {'3', '10'});
+>> [h, p] = ttest2(x1, x2)
+
+h =
+
+     1 % h = 0 时为真， h = 1 时为假
+
+
+p =
+
+    0.0423 % 一般与 0.05 比较，小于 0.05 说明假设不通过
+```
+
+
+
+### 回归
+
+```matlab
+>> x = [-1.2 -0.5 0.3 0.9 1.8 2.6 3.0 3.5];
+>> y = [-15.6 -8.5 2.2 4.5 6.6 8.2 8.9 10.0]; % 输入点的坐标
+>> fit = polyfit(x, y, 1) % 通过 ployfit 函数得到合适一次函数的参数值
+
+fit =
+
+    4.9897   -4.4491
+
+>> xfit = [x(1): 0.1: x(end)];
+>> yfit = fit(1) * xfit + fit(2);
+>> plot(x, y, 'ro', xfit, yfit); % 绘制各个点与回归线
+>> set(gca, 'FontSize', 14);
+>> legend('Location', 'Northwest', 'data points', 'best-fit'); % 设定图标的位置和名称
+```
+
+
+
+#### 练习：绘制温度与电压的关系
+
+```matlab
+>> T = [20 30 40 50 60];
+>> TC = [0.025 0.035 0.05 0.06 0.08];
+>> fit = polyfit(T, TC, 1)
+
+fit =
+
+    0.0014   -0.0040
+
+>> x = [T(1): 0.0001: T(end)];
+>> y = fit(1) * x + fit(2);
+>> plot(T, TC, 'ko', x, y);
+```
+
+
+
+#### 如何知道 x 和 y 是否具有线性相关性
+
+```matlab
+>> x = [-1.2 -0.5 0.3 0.9 1.8 2.6 3.0 3.5];
+>> y = [-15.6 -8.5 2.2 4.5 6.6 8.2 8.9 10.0];
+>> scatter(x, y); % 绘制散点图
+>> box on
+>> axis square % 使两坐标轴尺寸相同
+>> corrcoef(x, y) % 使用 corrcoef 函数查看相关系数，系数为 -1 <= r <= 1 ,接近 1 时为正相关
+
+ans =
+
+    1.0000    0.9202 % r 为 0.9202 ，可知是正相关，且相关性蛮大的
+    0.9202    1.0000
+```
+
+
+
+#### 查看是否高阶函数符合性更佳
+
+```matlab
+>> x = [-1.2 -0.5 0.3 0.9 1.8 2.6 3.0 3.5];
+y = [-15.6 -8.5 2.2 4.5 6.6 8.2 8.9 10.0];
+figure('Position', [50 50 1500 400]); % 控制图形显示位置、大小
+for i = 1: 3
+subplot(1, 3, i);
+p = polyfit(x, y, i); % 计算各阶函数的系数
+xfit = (x(1): 0.1: x(end));
+yfit = polyval(p, xfit); % 通过 polyval 获得 yfit
+plot(x, y, 'ro', xfit, yfit);
+set(gca, 'FontSize', 14);
+ylim([-17 11]);
+legend('Location', 'SouthEast', 'Data Points', 'Fitted curve');
+end
+```
+
+
+
+#### 练习：尝试 4 5 6 次方程来拟合上述点
+
+```matlab
+>> x = [-1.2 -0.5 0.3 0.9 1.8 2.6 3.0 3.5];
+y = [-15.6 -8.5 2.2 4.5 6.6 8.2 8.9 10.0];
+figure('Position', [50 50 1500 400]);
+for i = 4: 6
+subplot(1, 3, i-3);
+p = polyfit(x, y, i);
+xfit = (x(1): 0.1: x(end));
+yfit = polyval(p, xfit);
+plot(x, y, 'ro', xfit, yfit);
+set(gca, 'FontSize', 14);
+ylim([-17 11]);
+legend('Location', 'SouthEast', 'Data Points', 'Fitted curve');
+end
+```
+
+
+
+#### 多线性回归
+
+```matlab
+>> load carsmall; % 载入数据
+>> y = MPG;
+>> x1 = Weight;
+>> x2 = Horsepower;
+>> X = [ones(length(x1), 1) x1 x2]; % 由于需要拟合的函数为 y = a + bx1 + cx2 ，所以对于 a 的初始值要定为 1
+>> b = regress(y, X); % 求出三个系数 a b c
+>> xfit = min(x1): 100: max(x1);
+>> x2fit = min(x2): 100: max(x2);
+>> [X1FIT, X2FIT] = meshgrid(xfit, x2fit);
+>> YFIT = b(1) + b(2) * X1FIT + b(3) * X2FIT;
+>> scatter3(x1, x2, y, 'filled'); % 三维散点图
+>> hold on
+>> mesh(X1FIT, X2FIT, YFIT); % 三维面图
+>> hold off
+>> xlabel('Weight');
+>> ylabel('Horsepower');
+>> zlabel('MPG');
+>> view(50, 10);
+```
+
+
+
+#### 对于非线性方程的拟合
+
+使用 cftool
+
+
+
+### 内插
+
+#### 线性内插 interp1
+
+```matlab
+>> x = linspace(0, 2*pi, 40);
+>> x_m = x;
+>> x_m([11: 13, 28: 30]) = NaN; % 将部分值设为 Nan ，便不会在图中绘制出来
+>> y_m = sin(x_m);
+>> plot(x_m, y_m, 'ro', 'MarkerFaceColor', 'r');
+>> xlim([0, 2*pi]);
+>> ylim([-1.2, 1.2]);
+>> box on
+>> set(gca, 'FontName', 'Latex', 'FontSize', 16);
+>> set(gca, 'XTick', 0: pi/2: 2*pi);
+>> set(gca, 'XTickLabel', {'0', '\pi/2', '\pi', '3\pi/2', '2\pi'});
+>> 
+>> m_i = ~isnan(x_m); % 查看哪几个值是 nan
+>> y_i = interp1(x_m(m_i), y_m(m_i), x); % 对 x 中的值都做内插
+>> hold on 
+>> plot(x, y_i, '-b', 'LineWidth', 2); 
+>> hold off
+```
+
+
+
+#### spline 内插
+
+```matlab
+>> x = linspace(0, 2*pi, 40);
+>> x_m = x;
+>> x_m([11: 13, 28: 30]) = NaN; % 将部分值设为 Nan ，便不会在图中绘制出来
+>> y_m = sin(x_m);
+>> plot(x_m, y_m, 'ro', 'MarkerFaceColor', 'r');
+>> xlim([0, 2*pi]);
+>> ylim([-1.2, 1.2]);
+>> box on
+>> set(gca, 'FontName', 'Latex', 'FontSize', 16);
+>> set(gca, 'XTick', 0: pi/2: 2*pi);
+>> set(gca, 'XTickLabel', {'0', '\pi/2', '\pi', '3\pi/2', '2\pi'});
+>> 
+>> hold on 
+>> y_i1 = spline(x_m(m_i), y_m(m_i), x);
+>> plot(x, y_i1, '-g', 'LineWidth', 2);
+>> hold off
+>> h = legend('Original', 'Linear', 'Spline');
+>> set(h, 'FontName', 'Times New Roman');
+% 此时线条相对光滑
+```
+
+
+
+#### 练习：绘制一组数据点的线性内插线条和 spline 线条
+
+```matlab
+>> x = [0 0.25 0.75 1.25 1.5 1.75 1.875 2 2.125 2.25];
+>> y = [1.2 1.18 1.1 1 0.92 0.8 0.7 0.55 0.35 0];
+>> x_1 = 0: 0.01: 2.25;
+>> x_m = x_1;
+>> y_1 = interp1(x, y, x_1);
+>> plot(x_1, y_1, '-g');
+>> hold on 
+>> plot(x, y, 'bo');
+>> y_m = spline(x, y, x_m);
+>> plot(x_m, y_m, 'r');
+>> hold off
+```
+
+
+
+#### spline 与 Hermite 方式比较
+
+```matlab
+% 区别在于转折点处
+>> x = -3: 3;
+>> y = [-1 -1 -1 0 1 1 1];
+>> t = -3: 0.01: 3;
+>> s = spline(x, y, t);
+>> p = pchip(x, y, t);
+>> hold on 
+>> plot(t, s, ':g', 'LineWidth', 2);
+>> plot(t, p, '--b', 'LineWidth', 2);
+>> plot(x, y, 'ro', 'MarkerFaceColor', 'r');
+>> hold off
+>> box on
+>> set(gca, 'FontSize', 16);
+>> h = legend('Location', 'NorthWest', 'Spline', 'Hermite');
+```
+
+
+
+#### 平面线性内插
+
+```matlab
+>> xx = -2: 0.5: 2;
+>> yy = -2: 0.5: 3;
+>> [X, Y] = meshgrid(xx, yy);
+>> Z = X .* exp(-X.^2 - Y.^2);
+>> surf(X, Y, Z); % 画三维图
+>> hold on
+>> plot3(X, Y, Z+0.01, 'ok', 'MarkerFaceColor', 'r'); % 标红点
+>> 
+>> xx_i = -2: 0.1: 2;
+>> yy_i = -2: 0.1: 3;
+>> [X_i, Y_i] = meshgrid(xx_i, yy_i);
+>> Z_i = interp2(xx, yy, Z, X_i, Y_i); % 内插
+>> surf(X_i, Y_i, Z_i);
+>> hold on 
+>> plot3(X, Y , Z+0.01, 'ok', 'MarkerFaceColor', 'r'); % 标点
+```
+
+
+
+#### 平面平滑内插
+
+```matlab
+% 在 interp2 中添加参数 'cubic' 即可
+>> xx = -2: 0.5: 2;
+yy = -2: 0.5: 3;
+[X, Y] = meshgrid(xx, yy);
+Z = X .* exp(-X.^2 - Y.^2);
+surf(X, Y, Z);
+hold on
+plot3(X, Y, Z+0.01, 'ok', 'MarkerFaceColor', 'r');
+
+xx_i = -2: 0.1: 2;
+yy_i = -2: 0.1: 3;
+[X_i, Y_i] = meshgrid(xx_i, yy_i);
+Z_i = interp2(xx, yy, Z, X_i, Y_i, 'cubic');
+surf(X_i, Y_i, Z_i);
+hold on 
+plot3(X, Y , Z+0.01, 'ok', 'MarkerFaceColor', 'r');
+```
+
